@@ -42,7 +42,7 @@ class LoginViewTests(TestCase):
         Tests that users cannot log in with a username or email that doesn't belong to any existing accounts.
         They should be returned to the login page, and the response should have a status code of 200.
         """
-        url = reverse("core_app:login", args=())
+        url = reverse("login", args=())
         # reverse() is useful if you want to call view functions that take arguments other than the request itself.
         data = {"username" : "Non-Existent-Username", "email" : "non@existent.Email", "password" : "password"}
         # Creates the request.POST dictionary that would come as part of a POST request (a.k.a the POST request variables).
@@ -53,3 +53,6 @@ class LoginViewTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         # Similar to JUnit's version, assertEqual() asserts that it's first argument is equal to the second.
+        
+        # Since no accounts have been created during this test, there are no accounts to log into.
+        # Therefore, the login should fail, the user should be returned to the home page, and the status code should be 200.
