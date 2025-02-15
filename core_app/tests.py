@@ -40,12 +40,12 @@ class LoginViewTests(TestCase):
 
     def test_login_without_account(self):
         """
-        Tests that users cannot log in with a username or email that doesn't belong to any existing accounts.
+        Tests that users cannot log in with a username/email that doesn't belong to any existing accounts.
         They should be returned to the login page, and the response should have a status code of 200.
         """
         url = reverse("login", args=())
         # reverse() is useful if you want to call view functions that take arguments other than the request itself.
-        data = {"username" : "Non-Existent-Username", "email" : "non@existent.Email", "password" : "password"}
+        data = {"username_or_email" : "Non-Existent-Username", "password" : "password"}
         # Creates the request.POST dictionary that would come as part of a POST request (a.k.a the POST request variables).
 
         response = self.client.post(url, data)
@@ -60,22 +60,24 @@ class LoginViewTests(TestCase):
 
     def test_login_with_wrong_password(self):
         """
-        Tests that users cannot login using the wrong password for an existing account.
+        Tests that users cannot login using the wrong password for an existing account with a given username or email.
         They should be returned to the login page, and the response should have a status code of 200.
         """
         create_user("user001", "001@email.com", "password001")
         # Creates a user with the given username, email and password.
 
         url = reverse("login")
-        data = {"username" : "user001", "email" : "001@email.com", "password" : "password002"}
+        data1 = {"username_or_email" : "user001", "password" : "password002"}
+        data2 = {"username_or_email" : "001@email.com", "password" : "password002"}
         # Simulate logging in with the following details.
-        # Note: as of 12/02/25, login_view() only uses the user's username (not their email) when logging in.
 
-        response = self.client.post(url, data)
+        response1 = self.client.post(url, data1)
+        response2 = self.client.post(url, data2)
 
-        self.assertEqual(response.status_code, 200)
-        # The username and email given belong to an existing account, but the password given is incorrect.
-        # Therefore, the login should fail, the user should be returned to the login page, and the status code should be 200.
+        self.assertEqual(response1.status_code, 200)
+        self.assertEqual(response2.status_code, 200)
+        # The username/email belongs to an existing account, but the password given is incorrect in both.
+        # Therefore, the login(s) should fail, the user should be returned to the login page, and the status code should be 200.
 
     def test_login_with_correct_password(self):
         """
@@ -85,20 +87,21 @@ class LoginViewTests(TestCase):
         create_user("user001", "001@email.com", "password001")
         
         url = reverse("login")
-        data = {"username" : "user001", "email" : "001@email.com", "password" : "password001"}
+        data1 = {"username_or_email" : "user001", "password" : "password001"}
+        data2 = {"username_or_email" : "001@email.com", "password" : "password001"}
 
-        response1 = self.client.post(url, data)
+        response1 = self.client.post(url, data1)
+        response2 = self.client.post(url, data2)
 
         self.assertEqual(response1.status_code, 302)
+        self.assertEqual(response2.status_code, 302)
         # The username and email given belong to an existing account, and the password given is correct.
-        # Therefore, the login should succeed, the user should be redirected to the home page, and the status code should be 302.
+        # Therefore, the login(s) should succeed, the user should be redirected to the home page, and the status code should be 302.
 
-        response2 = self.client.post(url, data, follow=True)
         # For redirects in particular, if you wanted to get a regular response (containing the HTML content of the page),
         # then add "follow=True" to "self.client.post()".
         # For regular responses (where you use render() to return a HTML template), you don't need to do this.        
 
-        self.assertContains(response2, "This is the super temporary home page")
-        # assertContains() asserts that the first argument contains the second.
-        # The user should be redirected to the home page, which contains the text "This is the super temporary home page".
+        self.assertRedirects(response1, "/home/", status_code=302, target_status_code=200)
+        # This is a more complete way to test redirects, allowing you to check that the user ends up on the correct page.
         
