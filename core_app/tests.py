@@ -104,4 +104,90 @@ class LoginViewTests(TestCase):
 
         self.assertRedirects(response1, "/home/", status_code=302, target_status_code=200)
         # This is a more complete way to test redirects, allowing you to check that the user ends up on the correct page.
-        
+
+
+class RegisterViewTests(TestCase):
+    """
+    This is the class for the register_view() tests
+
+    Validation that should be implemented into register_view():
+    = Check that none of the input field POST variables are blank (this could never actually happen during normal usage
+        of the site, but it's good server side validation regardless)
+    = Check that the inputted username does not have the '@' character (so an email cannot be used for the username)
+    = Check that the inputted email is formatted like an email (at the very least containing the '@' character)
+    """
+
+    def test_register_with_taken_username(self):
+        """
+        Tests that users cannot register for an account using a username that already belongs to an existing account.
+        They should be redirected to the register page, and the response should have a status code of 302.
+        """
+        create_user("user001", "001@email.com", "password001")
+        # Create an existing user before trying to register for an account
+
+        url = reverse("register")
+        data = {"username" : "user001", "email" : "002@email.com", "password" : "password002", "confirm_password" : "password002"}
+
+        response = self.client.post(url, data)
+
+        self.assertRedirects(response, "/register/", status_code=302, target_status_code=200)
+        # The username given is already being used by an existing account.
+        # Therefore, the registration should fail, and the status code should be 302.
+
+    def test_register_with_taken_email(self):
+        """
+        Tests that users cannot register for an account using an email that already belongs to an existing account.
+        They should be redirected to the register page, and the response should have a status code of 302.
+        """
+        create_user("user001", "001@email.com", "password001")
+
+        url = reverse("register")
+        data = {"username" : "user002", "email" : "001@email.com", "password" : "password002", "confirm_password" : "password002"}
+
+        response = self.client.post(url, data)
+
+        self.assertRedirects(response, "/register/", status_code=302, target_status_code=200)
+        # The email given is already being used by an existing account.
+        # Therefore, the registration should fail, and the status code should be 302.
+
+    def test_register_with_non_matching_passwords(self):
+        """
+        Tests that users cannot register for an account if the inputted passwords do not match.
+        They should be redirected to the register page, and the response should have a status code of 302.
+        """
+        create_user("user001", "001@email.com", "password001")
+
+        url = reverse("register")
+        data = {"username" : "user001", "email" : "001@email.com", "password" : "password001", "confirm_password" : "password002"}
+
+        response = self.client.post(url, data)
+
+        self.assertRedirects(response, "/register/", status_code=302, target_status_code=200)
+        # The password given is different from the confirmation password.
+        # Therefore, the registration should fail, and the status code should be 302.
+
+    def test_register_with_valid_details(self):
+        """
+        Tests that users can register for an account if they give a unique username and email, along with matching passwords.
+        They should be redirected to the login page, and the response should have a status code of 302.
+        """
+        create_user("user001", "001@email.com", "password001")
+
+        url1 = reverse("register")
+        data1 = {"username" : "user002", "email" : "002@email.com", "password" : "password002", "confirm_password" : "password002"}
+
+        response1 = self.client.post(url1, data1)
+
+        self.assertRedirects(response1, "/login/", status_code=302, target_status_code=200)
+        # The username and email given are unique, and the two passwords match
+        # Therefore, the registration should succeed in creating an account, and the status code should be 302.
+
+        url2 = reverse("login")
+        data2 = {"username_or_email" : "002@email.com", "password" : "password002"}
+
+        response2 = self.client.post(url2, data2)
+        # Attempt to log into the newly created account
+
+        self.assertRedirects(response2, "/home/", status_code=302, target_status_code=200)
+        # The details of the account just created have been used to log in
+        # Therefore, the login(s) should succeed, the user should be redirected to the home page, and the status code should be 302.
