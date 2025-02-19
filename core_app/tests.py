@@ -198,7 +198,7 @@ class LogoutViewTests(TestCase):
 
     def test_logout_while_logged_in(self):
         """
-        Tests that users can log out (ideally using the Logout button in the navigation bar) if they are currently logged in.
+        Tests that users can log out (ideally using the Logout button within the navigation bar) if they are currently logged in.
         They should be redirected to the login page, and the response should have a status code of 302.
         """
         create_user("user001", "001@email.com", "password001")
@@ -223,6 +223,6 @@ class LogoutViewTests(TestCase):
         
         url = reverse("logout")
         response = self.client.get(url)
-        
+
         self.assertRedirects(response, "/login/", status_code=302, target_status_code=200)
         # The user should still be redirected to the login page, and the status code should be 302.
