@@ -60,7 +60,7 @@ class LoginViewTests(TestCase):
 
     def test_login_with_wrong_password(self):
         """
-        Tests that users cannot login using the wrong password for an existing account with a given username or email.
+        Tests that users cannot login using the wrong password, for an existing account with a given username or email.
         They should be returned to the login page, and the response should have a status code of 200.
         """
         create_user("user001", "001@email.com", "password001")
@@ -111,10 +111,7 @@ class RegisterViewTests(TestCase):
     This is the class for the register_view() tests
 
     Validation that should be implemented into register_view():
-    = Check that none of the input field POST variables are blank (this could never actually happen during normal usage
-        of the site, but it's good server side validation regardless)
-    = Check that the inputted username does not have the '@' character (so an email cannot be used for the username)
-    = Check that the inputted email is formatted like an email (at the very least containing the '@' character)
+    = Check that the inputted username does not have the '@' character (so an email cannot be used for the username and vice versa)
     """
 
     def test_register_with_taken_username(self):
@@ -152,7 +149,7 @@ class RegisterViewTests(TestCase):
 
     def test_register_with_non_matching_passwords(self):
         """
-        Tests that users cannot register for an account if the inputted passwords do not match.
+        Tests that users cannot register for an account if their inputted passwords do not match.
         They should be redirected to the register page, and the response should have a status code of 302.
         """
         create_user("user001", "001@email.com", "password001")
@@ -191,3 +188,41 @@ class RegisterViewTests(TestCase):
         self.assertRedirects(response2, "/home/", status_code=302, target_status_code=200)
         # The details of the account just created have been used to log in
         # Therefore, the login(s) should succeed, the user should be redirected to the home page, and the status code should be 302.
+
+
+class LogoutViewTests(TestCase):
+    """
+    This is the class for the logout_view() tests.
+    Note that logout_view() does not correspond to any specific Logout page (since there isn't one).
+    """
+
+    def test_logout_while_logged_in(self):
+        """
+        Tests that users can log out (ideally using the Logout button in the navigation bar) if they are currently logged in.
+        They should be redirected to the login page, and the response should have a status code of 302.
+        """
+        create_user("user001", "001@email.com", "password001")
+
+        self.client.login(username="user001", password="password001")
+        # Django's login() function is what properly logs a user account in (it is used by login_view() as well)
+        # There is an equivalent logout() function which logout_view() uses
+
+        url = reverse("logout")
+        response = self.client.get(url)
+
+        self.assertRedirects(response, "/login/", status_code=302, target_status_code=200)
+        # If logging out, the user should be redirected to the login page, and the status code should be 302.
+
+    def test_logout_while_logged_out(self):
+        """
+        Tests what happens if the user attempts to log out while not being logged in.
+        Though not intended, the user can do this by using the logout URL to manually invoke logout_view().
+        The outcome should be the same as if the user was previously logged in, with no other side effects.
+        """
+        # By default, the user is not logged into any account
+        
+        url = reverse("logout")
+        response = self.client.get(url)
+        
+        self.assertRedirects(response, "/login/", status_code=302, target_status_code=200)
+        # The user should still be redirected to the login page, and the status code should be 302.
