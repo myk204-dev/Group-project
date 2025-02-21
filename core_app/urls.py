@@ -19,5 +19,7 @@ urlpatterns = [
     path('quizzes/', views.quizzes_view, name="quizzes"),
     path('videos/', views.videos_view, name="videos"),
     path('maps/', views.maps_view, name="maps"),
+    path('admin/', views.admin_view, name="admin"),
+    path('manage-users/', views.manageusers_view, name="manage-users")
     # End comment
 ]
