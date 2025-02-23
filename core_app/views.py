@@ -91,7 +91,7 @@ def maps_view(request):
     return render(request, 'core_app/maps.html')
 def admin_view(request):
     return render(request, 'core_app/admin.html')
-def manageusers_view(request):
+def manage_users_view(request):
     users = [
         {"username": "Alice", "email": "alice@example.com", "role": "Admin"},
         {"username": "Bob", "email": "bob@example.com", "role": "User"},
@@ -99,5 +99,5 @@ def manageusers_view(request):
     context = {
         'users': users,
     }
-    return render(request, 'manage_users.html', context)
+    return render(request, 'core_app/manage-users.html', context)
 # Endcomment
