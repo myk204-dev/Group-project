@@ -16,7 +16,7 @@ urlpatterns = [
     path('privacy_policy/', views.privacy_policy_view, name="privacy_policy"),
     path('leaderboard/', views.leaderboard_view, name='leaderboard'),
     path('admin_page/', views.admin_view, name="admin_page"),
-
+    path('admin-content/', views.admin_content, name='admin-content'),
     # Commented for easy removal. Based on group decision
     path('videos/', views.videos_view, name="videos"),
     path('maps/', views.maps_view, name="maps"),

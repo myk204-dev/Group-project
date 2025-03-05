@@ -116,3 +116,7 @@ def leaderboard_view(request):
 
 def admin_view(request):
     return render(request, 'core_app/admin.html')
+
+
+def admin_content(request):
+    return render(request, 'core_app/admin-content.html')
